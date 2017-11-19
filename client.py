@@ -57,7 +57,7 @@ class Client(Thread):
     try:
       self.ssl_sock = ssl.wrap_socket(self.socket, ca_certs=self.ssl_certfile, cert_reqs=ssl.CERT_REQUIRED)
       print("Wrapped client socket for SSL")
-    except socket.error:
+    except:
       print("Error wrapping SSL socket")
       exit(1)
 
