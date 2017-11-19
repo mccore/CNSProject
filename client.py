@@ -21,12 +21,22 @@ class Server(Thread):
     self.socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
     self.socket.bind(('', int(port)))
 
+  msg = None
   def run(self):
     self.socket.listen(5)
     while True:
       print ('Waiting for connection..')
       client, caddr = self.socket.accept()
       print ('Connected To', caddr)
+      #try wrapping the connection with SSL (Protocol TLSv2)
+      try:
+      	self.connstream = ssl.wrap_socket(self.conn, serverSide=True, 
+      									  certfile=ssl_certfile, keyfile=ssl_keyfile,
+      									  ssl_version=ssl.PROTOCOL_TLSv2)
+      	print "SSL wrap succeeded for server"
+      except socket.error, msg:
+      	print "SSL wrap failed for server"
+
       print('Sending hash list')
       #If we can't straight up send a list then we may need to turn this into a for loop
       client.send(self.hash_list)
