@@ -44,7 +44,8 @@ class Client(Thread):
     while invalid:
       try:
         invalid = False
-        self.socket.connect(self.addr)
+        self.ssl_sock = ssl.wrap_socket(self.socket, ca_certs=ssl_certfile, cert_reqs=ssl.CERT_REQUIRED )
+        self.ssl_sock.connect(self.addr)
       except:
         invalid = True
 
@@ -66,6 +67,10 @@ def main():
   destPORT = sys.argv[2]
   sourcePORT = sys.argv[3]
   directory = sys.argv[4]
+
+  os.system("openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365")
+  ssl_certfile = "./cert.pem"
+  ssl_keyfile = "./key.pem"
 
   BLOCKSIZE = 65536
   hash_list = []
