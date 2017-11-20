@@ -25,9 +25,9 @@ class Server(Thread):
       print ('Waiting for connection..')
       self.client, caddr = self.socket.accept()
       print ('Connected To', caddr)
-      #try wrapping the connection with SSL (Protocol TLSv2)
+      #try wrapping the connection with SSL (Protocol TLSv1.2)
       try:
-        self.connstream = ssl.wrap_socket(self.client, serverSide=True, certfile=ssl_certfile, keyfile=ssl_keyfile, ssl_version=ssl.PROTOCOL_TLSv2)
+        self.connstream = ssl.wrap_socket(self.client, server_side=True, certfile=self.ssl_certfile, keyfile=self.ssl_keyfile, ssl_version=ssl.PROTOCOL_TLSv1_2)
         print("SSL wrap succeeded for server")
       except:
         print("SSL wrap failed for server")
@@ -35,8 +35,8 @@ class Server(Thread):
 
       print('Sending hash list')
       #If we can't straight up send a list then we may need to turn this into a for loop
-      for aHash in hash_list:
-        self.connstream.send(aHash)
+      for aHash in self.hash_list:
+        self.connstream.sendall(str(aHash).encode())
 
     self.socket.close()
     self.connstream.close()
@@ -48,7 +48,7 @@ class Client(Thread):
     self.port = port
     self.host = host
     self.bufsize = 1024
-    self.addr = (host,port)
+    self.addr = (host, int(port))
     self.hash_list = hash_list
     self.ssl_certfile = ssl_certfile
     self.socket = socket(AF_INET , SOCK_STREAM)
@@ -70,17 +70,30 @@ class Client(Thread):
 
     #We should be receiving the hash list from the other side which may need to be in a recv loop.
     new_hash_list = []
-    while True:
-      try:
-        new_hash_list.append(self.ssl_sock.recv(1024))
-      except:
-        print("Error on recv()")
-        exit(1)
+    #while True:
+    try:
+      data = self.ssl_sock.recv(1024).decode()
+      new_hash_list.append(data)
+      print(data)
+      # if data == None:
+      #   break
+    except:
+      print("Error on recv()")
+      exit(1)
+
 
     self.socket.close()
     self.ssl_sock.close()
 
     #We now need to compare the hash_list we received to the hash_list that we already have. Then print out the common hashes and their total number.
+    common_count = 0
+    for a in new_hash_list:
+      for b in self.hash_list:
+        if str(a) == str(b):
+          print(a)
+          common_count += 1
+    print(common_count)
+
 
 def main():
   if len(sys.argv) != 5:
@@ -91,7 +104,7 @@ def main():
   sourcePORT = sys.argv[3]
   directory = sys.argv[4]
 
-  os.system("openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'")
+  #os.system("openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'")
   ssl_certfile = "./cert.pem"
   ssl_keyfile = "./key.pem"
 
@@ -99,7 +112,8 @@ def main():
   hash_list = []
   for filename in os.listdir(directory):
     hasher = hashlib.sha3_512()
-    with open(filename, 'rb') as afile:
+    fullpath = directory + "/" + filename
+    with open(fullpath, 'rb') as afile:
       buf = afile.read(BLOCKSIZE)
       while len(buf) > 0:
         hasher.update(buf)
