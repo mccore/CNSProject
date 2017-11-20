@@ -22,22 +22,23 @@ class Server(Thread):
   def run(self):
     self.socket.listen(5)
     while True:
-      print ('Waiting for connection..')
+      print ('SERVER: Waiting for connection..')
       self.client, caddr = self.socket.accept()
-      print ('Connected To', caddr)
+      print ('SERVER: Connected To', caddr)
       #try wrapping the connection with SSL (Protocol TLSv1.2)
       try:
-        self.connstream = ssl.wrap_socket(self.client, server_side=True, certfile=self.ssl_certfile, keyfile=self.ssl_keyfile, ssl_version=ssl.PROTOCOL_TLSv1_2)
-        print("SSL wrap succeeded for server")
+        self.connstream = ssl.wrap_socket(self.client, server_side=True, certfile=self.ssl_certfile, keyfile=self.ssl_keyfile, ssl_version=ssl.PROTOCOL_TLSv1_2, do_handshake_on_connect=True)
+        print("SERVER: SSL wrap succeeded for server")
       except:
-        print("SSL wrap failed for server")
+        print("SERVER: SSL wrap failed for server")
         exit(1)
 
-      print('Sending hash list')
-      #If we can't straight up send a list then we may need to turn this into a for loop
-      for aHash in self.hash_list:
-        self.connstream.sendall(str(aHash).encode())
+      print('SERVER: Sending hash list')
 
+      for aHash in self.hash_list:
+        self.connstream.send(aHash.hexdigest().encode())
+
+    print("SERVER: Closing client connection")
     self.socket.close()
     self.connstream.close()
 
@@ -52,36 +53,38 @@ class Client(Thread):
     self.hash_list = hash_list
     self.ssl_certfile = ssl_certfile
     self.socket = socket(AF_INET , SOCK_STREAM)
+    self.socket.settimeout(5)
 
   def run(self):
     try:
-      self.ssl_sock = ssl.wrap_socket(self.socket, ca_certs=self.ssl_certfile, cert_reqs=ssl.CERT_REQUIRED)
-      print("Wrapped client socket for SSL")
+      self.ssl_sock = ssl.wrap_socket(self.socket, ca_certs=self.ssl_certfile, cert_reqs=ssl.CERT_REQUIRED, do_handshake_on_connect=True)
+      print("CLIENT: Wrapped client socket for SSL")
     except:
-      print("Error wrapping SSL socket")
+      print("CLIENT: Error wrapping SSL socket")
       exit(1)
 
     try:
       self.ssl_sock.connect(self.addr)
-      print("Client socket connected")
+      print("CLIENT: Client socket connected")
     except:
-      print("Error on client socket connect")
+      print("CLIENT: Error on client socket connect")
       exit(1)
 
-    #We should be receiving the hash list from the other side which may need to be in a recv loop.
     new_hash_list = []
-    #while True:
     try:
       data = self.ssl_sock.recv(1024).decode()
-      new_hash_list.append(data)
-      print(data)
-      # if data == None:
-      #   break
+      while data:
+        new_hash_list.append(data)
+        #print(data)
+        try:
+          data = self.ssl_sock.recv(1024).decode()
+        except timeout:
+          break
     except:
-      print("Error on recv()")
+      print("CLIENT: Error on recv()")
       exit(1)
 
-
+    print("CLIENT: Closing server connection")
     self.socket.close()
     self.ssl_sock.close()
 
@@ -89,10 +92,10 @@ class Client(Thread):
     common_count = 0
     for a in new_hash_list:
       for b in self.hash_list:
-        if str(a) == str(b):
+        if a == b.hexdigest():
           print(a)
           common_count += 1
-    print(common_count)
+    print("Common file count: ", common_count)
 
 
 def main():
