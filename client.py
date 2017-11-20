@@ -1,3 +1,4 @@
+#!/usr/bin/env python 3.5
 from socket import *
 from threading import Thread
 import sys
@@ -22,7 +23,7 @@ class Server(Thread):
   def run(self):
     self.socket.listen(5)
     while True:
-      print ('SERVER: Waiting for connection..')
+      print ('SERVER: Waiting for connection')
       self.client, caddr = self.socket.accept()
       print ('SERVER: Connected To', caddr)
       #try wrapping the connection with SSL (Protocol TLSv1.2)
@@ -135,7 +136,7 @@ def main():
 
   server.start()
 
-  input("Press enter to launch client\n")
+  input("Press ENTER to launch client")
   client.start()
 
   while client.isAlive() and server.isAlive():
