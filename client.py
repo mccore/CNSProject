@@ -31,7 +31,7 @@ class Server(Thread):
         print("SERVER: SSL wrap succeeded for server")
       except:
         print("SERVER: SSL wrap failed for server")
-        exit(1)
+        sys.exit(1)
 
       print('SERVER: Sending hash list')
 
@@ -61,14 +61,14 @@ class Client(Thread):
       print("CLIENT: Wrapped client socket for SSL")
     except:
       print("CLIENT: Error wrapping SSL socket")
-      exit(1)
+      sys.exit(1)
 
     try:
       self.ssl_sock.connect(self.addr)
       print("CLIENT: Client socket connected")
     except:
       print("CLIENT: Error on client socket connect")
-      exit(1)
+      sys.exit(1)
 
     new_hash_list = []
     try:
@@ -82,7 +82,7 @@ class Client(Thread):
           break
     except:
       print("CLIENT: Error on recv()")
-      exit(1)
+      sys.exit(1)
 
     print("CLIENT: Closing server connection")
     self.socket.close()
@@ -99,8 +99,13 @@ class Client(Thread):
 
 
 def main():
+  if sys.version_info < (3, 5):
+    print("Python 3.5 or above must be used for this program")
+    sys.exit(1)
+
   if len(sys.argv) != 5:
     print ('usage: python3 client.py <destination IP> <destination port> <source port> <directory of files>')
+    sys.exit(1)
 
   destIP = sys.argv[1]
   destPORT = sys.argv[2]
@@ -137,7 +142,6 @@ def main():
     time.sleep(0.100)
   #No idea what this is for
   #server.join()
-
 
 if __name__ == "__main__":
   main()
