@@ -26,3 +26,4 @@ Our second assumption is that the certificate and key are disseminated to all th
 ## Security
 
 ##Tests
+One piece of evidence for the security of the program can be seen in the zipped sample capture from Wireshark. In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to added ports to a protocols filter so that the actual SSL/TLS packets can be seen.
