@@ -1,4 +1,7 @@
 # CNSProject
+At least two clients, say Alice and Bob, want to find out how many files they have in
+common. Alice and Bob do not deviate from their protocol but might try to analyze what they see to get more information (semi-honest behavior). The objective of this project is to make sure that Alice and Bob get what they want without learning more than they should.
+
 ## Dependencies
 The program requires that at least `Python 3.5` be used.
 Additionally, the module `pysha3` must be installed. On Ubuntu this can be done with the command `sudo pip3 install pysha3`.
@@ -12,6 +15,7 @@ Thirdly, the cert and key combo must be generated and shared. This is done using
 
 ## Assumptions
 Our first assumption is that >=1000 files of size >=10Mb are used. We assume this to prevent an attacker from simply using one or a few files to compare to a different client. If this were allowed then an adversary could know everything about a specific file if the other client also has it.
+Our second assumption is that the certificate and key are disseminated to all the clients by some other mechanism outside the scope of the project.
 
 ## Collision resistant hash function
 
@@ -20,3 +24,5 @@ Our first assumption is that >=1000 files of size >=10Mb are used. We assume thi
 ## CPA secure public-key and symmetric-key encryption
 
 ## Security
+
+##Tests

@@ -8,7 +8,9 @@ import sha3
 import ssl
 import time
 
+#The server thread is responsible for responding to client connections and sending them all of the hashes required for calculating common files
 class Server(Thread):
+  #The thread is initialized with its own versions of some variables as well as creating the socket and setting some options on it.
   def __init__(self, port, hash_list, ssl_certfile, ssl_keyfile):
     Thread.__init__(self)
     self.hash_list = hash_list
@@ -20,13 +22,15 @@ class Server(Thread):
     self.socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
     self.socket.bind(('', int(port)))
 
+  #The run method is what actually does the wrapping of the socket into an encrypted socket and then sends all of the hashes
   def run(self):
     self.socket.listen(5)
     while True:
       print ('SERVER: Waiting for connection')
       self.client, caddr = self.socket.accept()
-      print ('SERVER: Connected To', caddr)
-      #try wrapping the connection with SSL (Protocol TLSv1.2)
+      print ('SERVER: Connected to', caddr)
+
+      #try wrapping the connection with SSL (Protocol TLSv1.2) and load up the cert and key. Also make sure to set the option to do the handshake on connect to ensure proper authentication.
       try:
         self.connstream = ssl.wrap_socket(self.client, server_side=True, certfile=self.ssl_certfile, keyfile=self.ssl_keyfile, ssl_version=ssl.PROTOCOL_TLSv1_2, do_handshake_on_connect=True)
         print("SERVER: SSL wrap succeeded for server")
@@ -36,15 +40,18 @@ class Server(Thread):
 
       print('SERVER: Sending hash list')
 
+      #Do the actual send
       for aHash in self.hash_list:
         self.connstream.send(aHash.hexdigest().encode())
 
+    #We could just close the SSL socket but it is just a better practice to close the inner socket and then the wrapper.
     print("SERVER: Closing client connection")
     self.socket.close()
     self.connstream.close()
 
-
+#The client thread is responsible for receiving the hashes from the server, computing/calculating the common ones, and printing them
 class Client(Thread):
+  #The thread is initialized with its own versions of some variables as well as creating the socket and setting a timeout so that we can exit the recv() loop when we stop receiving data.
   def __init__(self, host, port, hash_list, ssl_certfile):
     Thread.__init__(self)
     self.port = port
@@ -56,6 +63,7 @@ class Client(Thread):
     self.socket = socket(AF_INET , SOCK_STREAM)
     self.socket.settimeout(5)
 
+  #Again, run is where wrapping happens and where the recv loop happens. The recv() is in a try-except block in order to break when the timeout is reached.
   def run(self):
     try:
       self.ssl_sock = ssl.wrap_socket(self.socket, ca_certs=self.ssl_certfile, cert_reqs=ssl.CERT_REQUIRED, do_handshake_on_connect=True)
@@ -100,6 +108,7 @@ class Client(Thread):
 
 
 def main():
+  #Check the version info so that the program can actually be run. Technically, it should run into an error before this when checking things like "print" which would be different on 2.7. However, checking for 3.5 makes sure the crypto modules will work too.
   if sys.version_info < (3, 5):
     print("Python 3.5 or above must be used for this program")
     sys.exit(1)
@@ -117,6 +126,7 @@ def main():
   ssl_certfile = "./cert.pem"
   ssl_keyfile = "./key.pem"
 
+  #Here is where we actually hash the files. I chose a rather large block size because most computers should be able to use it and still produce a hash quickly. Basically, for every file in a directory we read the block size and update the hash until the entire file is hashed. Then we store the hash and move to the next file.
   BLOCKSIZE = 65536
   hash_list = []
   for filename in os.listdir(directory):
@@ -130,19 +140,23 @@ def main():
       print(hasher.hexdigest())
       hash_list.append(hasher)
 
-
+  #Start the threads
   server = Server(sourcePORT, hash_list, ssl_certfile, ssl_keyfile)
   client = Client(destIP, destPORT, hash_list, ssl_certfile)
 
   server.start()
 
-  input("Press ENTER to launch client")
+  input("Press ENTER to launch client\n")
   client.start()
 
+  #Busy loop while the threds are doing their thing
   while client.isAlive() and server.isAlive():
     time.sleep(0.100)
-  #No idea what this is for
-  #server.join()
+
+  client.join()
+  print("CLIENT: Thread joined to main")
+  server.join()
+  print("SERVER: Thread joined to main")
 
 if __name__ == "__main__":
   main()
