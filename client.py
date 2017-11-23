@@ -11,9 +11,9 @@ import time
 #The server thread is responsible for responding to client connections and sending them all of the hashes required for calculating common files
 class Server(Thread):
   #The thread is initialized with its own versions of some variables as well as creating the socket and setting some options on it.
-  def __init__(self, port, hash_list, ssl_certfile, ssl_keyfile):
+  def __init__(self, port, hash_dict, ssl_certfile, ssl_keyfile):
     Thread.__init__(self)
-    self.hash_list = hash_list
+    self.hash_dict = hash_dict
     self.bufsize = 65535
     self.ssl_certfile = ssl_certfile
     self.ssl_keyfile = ssl_keyfile
@@ -41,7 +41,7 @@ class Server(Thread):
       print('SERVER: Sending hash list')
 
       #Do the actual send
-      for aHash in self.hash_list:
+      for aHash in self.hash_dict.values():
         self.connstream.send(aHash.hexdigest().encode())
 
     #We could just close the SSL socket but it is just a better practice to close the inner socket and then the wrapper.
@@ -52,13 +52,13 @@ class Server(Thread):
 #The client thread is responsible for receiving the hashes from the server, computing/calculating the common ones, and printing them
 class Client(Thread):
   #The thread is initialized with its own versions of some variables as well as creating the socket and setting a timeout so that we can exit the recv() loop when we stop receiving data.
-  def __init__(self, host, port, hash_list, ssl_certfile):
+  def __init__(self, host, port, hash_dict, ssl_certfile):
     Thread.__init__(self)
     self.port = port
     self.host = host
     self.bufsize = 1024
     self.addr = (host, int(port))
-    self.hash_list = hash_list
+    self.hash_dict = hash_dict
     self.ssl_certfile = ssl_certfile
     self.socket = socket(AF_INET , SOCK_STREAM)
     self.socket.settimeout(5)
@@ -97,12 +97,13 @@ class Client(Thread):
     self.socket.close()
     self.ssl_sock.close()
 
-    #We now need to compare the hash_list we received to the hash_list that we already have. Then print out the common hashes and their total number.
+    #We now need to compare the hash_list we received to the hash_dict that we already have. Then print out the common files and their total number.
+    print("Common files:")
     common_count = 0
-    for a in new_hash_list:
-      for b in self.hash_list:
-        if a == b.hexdigest():
-          print(a)
+    for h in new_hash_list:
+      for k,v in self.hash_dict.items():
+        if h == v.hexdigest():
+          print(k)
           common_count += 1
     print("Common file count: ", common_count)
 
@@ -128,7 +129,7 @@ def main():
 
   #Here is where we actually hash the files. I chose a rather large block size because most computers should be able to use it and still produce a hash quickly. Basically, for every file in a directory we read the block size and update the hash until the entire file is hashed. Then we store the hash and move to the next file.
   BLOCKSIZE = 65536
-  hash_list = []
+  hash_dict = {}
   for filename in os.listdir(directory):
     hasher = hashlib.sha3_512()
     fullpath = directory + "/" + filename
@@ -138,14 +139,15 @@ def main():
         hasher.update(buf)
         buf = afile.read(BLOCKSIZE)
       print(hasher.hexdigest())
-      hash_list.append(hasher)
+      hash_dict[fullpath] = hasher
 
   #Start the threads
-  server = Server(sourcePORT, hash_list, ssl_certfile, ssl_keyfile)
-  client = Client(destIP, destPORT, hash_list, ssl_certfile)
+  server = Server(sourcePORT, hash_dict, ssl_certfile, ssl_keyfile)
+  client = Client(destIP, destPORT, hash_dict, ssl_certfile)
 
   server.start()
 
+  #This is here so that someone testing this program can visually confirm that all the Server threads have started properly and that when the client thread starts it is able to connect.
   input("Press ENTER to launch client\n")
   client.start()
 
