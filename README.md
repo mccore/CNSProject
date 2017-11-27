@@ -4,7 +4,7 @@ common. Alice and Bob do not deviate from their protocol but might try to analyz
 
 ## Dependencies
 The program requires that at least `Python 3.5` be used.
-Additionally, the module `pysha3` must be installed. On Ubuntu this can be done with the command `sudo pip3 install pysha3`.
+Additionally, the module `pysha3` must be installed. On Ubuntu this can be done with the command `sudo pip3 install pysha3`. If pip3 is not install please use the command `sudo apt-get install python3-pip`.
 Also, `openssl` is required for the cert and key generation but this is commonly installed on most systems.
 
 ## Usage
@@ -29,3 +29,5 @@ CPA security is guaranteed by our usage of TLSv1.2. Please refer to [this articl
 One piece of evidence for the security of the program can be seen in this [zipped sample capture from Wireshark](https://www.dropbox.com/s/5xo37gr07b14q4e/Sample_Capture.pcapng.zip?dl=0). In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to add ports to a protocol's filter so that the actual SSL/TLS packets can be seen.
 
 ## References
+https://docs.python.org/3/installing/index.html
+http://www.bearcave.com/software/python/SSLClientServer.py
