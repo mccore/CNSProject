@@ -23,10 +23,9 @@ Our second assumption is that the certificate and key are disseminated to all th
 ## Existentially unforgeable MACs and signatures
 
 ## CPA secure public-key and symmetric-key encryption
+CPA security is guaranteed by our usage of TLSv1.2. Please refer to [this article](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for a simple explanation of the security proof and [this paper](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for the full security proof.
 
-## Security
-
-## Tests
+## Security/Tests
 One piece of evidence for the security of the program can be seen in this [zipped sample capture from Wireshark](https://www.dropbox.com/s/5xo37gr07b14q4e/Sample_Capture.pcapng.zip?dl=0). In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to add ports to a protocol's filter so that the actual SSL/TLS packets can be seen.
 
 ## References
