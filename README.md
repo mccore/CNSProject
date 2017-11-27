@@ -19,11 +19,10 @@ Our first assumption is that >=1000 files of size >=10Mb are used. We assume thi
 Our second assumption is that the certificate and key are disseminated to all the clients by some other mechanism outside the scope of the project.
 
 ## Collision resistant hash function
+We chose sha-3 (Keccak) with 512 bits as our hash function so that nothing can be learned about a file even when a client gets the hash. Furthermore, collisions have not been found in sha-3. This can be seen in [this presentation](https://csrc.nist.gov/CSRC/media/Events/ISPAB-DECEMBER-2013-MEETING/documents/new_sha3_functions.pdf) from NIST as well as [this cryptanalysis](http://christina-boura.info/sites/default/files/presentation_5.pdf) of the hash scheme. In addition, we found [this](https://crypto.stackexchange.com/questions/45377/why-cant-we-reverse-hashes) stack exchange answer useful in explaining why we can't invert the hashes to gain information about the files. 
 
-## Existentially unforgeable MACs and signatures
-
-## CPA secure public-key and symmetric-key encryption
-CPA security is guaranteed by our usage of TLSv1.2. Please refer to [this article](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for a simple explanation of the security proof and [this paper](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for the full security proof.
+## CPA secure public-key and symmetric-key encryption and Existentially unforgeable MACs and signatures
+CPA security is guaranteed by our usage of TLSv1.2. Please refer to [this article](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for a simple explanation of the security proof and [this paper](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for the full security proof. These same two links also include explanations for the MACs and signatures as well. However more details can be found in [RFC 5246](https://tools.ietf.org/html/rfc5246) which provides specifications for TLSv1.2 as well as [RFC 6066](https://tools.ietf.org/html/rfc6066) which provides specifications for TLS extensions.
 
 ## Security/Tests
 One piece of evidence for the security of the program can be seen in this [zipped sample capture from Wireshark](https://www.dropbox.com/s/5xo37gr07b14q4e/Sample_Capture.pcapng.zip?dl=0). In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to add ports to a protocol's filter so that the actual SSL/TLS packets can be seen.
