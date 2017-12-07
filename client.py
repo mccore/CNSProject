@@ -130,6 +130,7 @@ def main():
   #Here is where we actually hash the files. I chose a rather large block size because most computers should be able to use it and still produce a hash quickly. Basically, for every file in a directory we read the block size and update the hash until the entire file is hashed. Then we store the hash and move to the next file.
   BLOCKSIZE = 65536
   hash_dict = {}
+  hash_count = 0
   for filename in os.listdir(directory):
     hasher = hashlib.sha3_512()
     fullpath = directory + "/" + filename
@@ -138,7 +139,11 @@ def main():
       while len(buf) > 0:
         hasher.update(buf)
         buf = afile.read(BLOCKSIZE)
-      print(hasher.hexdigest())
+      hash_count = hash_count + 1
+      #print(hasher.hexdigest())
+      print("Number of file being hashed: ")
+      print(str(hash_count) + ",", end="")
+      sys.stdout.flush()
       hash_dict[fullpath] = hasher
 
   #Start the threads
