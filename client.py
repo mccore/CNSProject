@@ -1,12 +1,9 @@
 #!/usr/bin/env python 3.5
 from socket import *
 from threading import Thread
-import sys
-import os
-import hashlib
-import sha3
-import ssl
-import time
+import sys, os, time, shutil
+import hashlib, sha3, ssl
+
 
 #The server thread is responsible for responding to client connections and sending them all of the hashes required for calculating common files
 class Server(Thread):
@@ -131,7 +128,7 @@ def main():
   BLOCKSIZE = 65536
   hash_dict = {}
   hash_count = 0
-  print("Number of file being hashed: ")
+  print("Files being hashed: ")
   for filename in os.listdir(directory):
     hasher = hashlib.sha3_512()
     fullpath = directory + "/" + filename
@@ -141,9 +138,7 @@ def main():
         hasher.update(buf)
         buf = afile.read(BLOCKSIZE)
       hash_count = hash_count + 1
-      #print(hasher.hexdigest())
-      print(str(hash_count) + ",", end="")
-      sys.stdout.flush()
+      print(str(hash_count) + ", " + filename + ", " + hasher.hexdigest())
       hash_dict[fullpath] = hasher
   print("")
 
