@@ -14,6 +14,9 @@ Second, the program should be run in two separate folders. This is to properly o
 Third, the cert and key combo must be generated and shared. This is done using the command `openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'`.
 Fourth, keep in mind that in order to start the client receiving one must hit `enter`.
 
+## Example
+![Program in action](https://github.com/mccore/CNSProject/blob/master/example.gif)
+
 ## Assumptions
 Our first assumption is that >=1000 files of size >=10Mb are used. We assume this to prevent an attacker from simply using one or a few files to compare to a different client. If this were allowed then an adversary could know everything about a specific file if the other client also has it.
 Our second assumption is that the certificate and key are disseminated to all the clients by some other mechanism outside the scope of the project.
