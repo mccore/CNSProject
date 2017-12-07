@@ -131,6 +131,7 @@ def main():
   BLOCKSIZE = 65536
   hash_dict = {}
   hash_count = 0
+  print("Number of file being hashed: ")
   for filename in os.listdir(directory):
     hasher = hashlib.sha3_512()
     fullpath = directory + "/" + filename
@@ -141,10 +142,10 @@ def main():
         buf = afile.read(BLOCKSIZE)
       hash_count = hash_count + 1
       #print(hasher.hexdigest())
-      print("Number of file being hashed: ")
       print(str(hash_count) + ",", end="")
       sys.stdout.flush()
       hash_dict[fullpath] = hasher
+  print("")
 
   #Start the threads
   server = Server(sourcePORT, hash_dict, ssl_certfile, ssl_keyfile)
