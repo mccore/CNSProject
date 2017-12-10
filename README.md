@@ -3,7 +3,7 @@ At least two clients, say Alice and Bob, want to find out how many files they ha
 common. Alice and Bob do not deviate from their protocol but might try to analyze what they see to get more information (semi-honest behavior). The objective of this project is to make sure that Alice and Bob get what they want without learning more than they should.
 
 ## Dependencies
-The program requires that at least `Python 3.5` be used.
+The program requires that at least `Python 3.5` be used.    
 Additionally, the module `pysha3` must be installed. On Ubuntu this can be done with the command `sudo pip3 install pysha3`. If pip3 is not installed please use the command `sudo apt-get install python3-pip`.
 Also, `openssl` is required for the cert and key generation but this is commonly installed on most systems.
 
@@ -29,7 +29,7 @@ We chose sha-3 (Keccak) with 512 bits as our hash function so that nothing can b
 CPA security is guaranteed by our usage of TLSv1.2. Please refer to [this article](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for a simple explanation of the security proof and [this paper](https://blog.cryptographyengineering.com/2012/09/28/on-provable-security-of-tls-part-2/) for the full security proof. These same two links also include explanations for the MACs and signatures as well. However more details can be found in [RFC 5246](https://tools.ietf.org/html/rfc5246) which provides specifications for TLSv1.2 as well as [RFC 6066](https://tools.ietf.org/html/rfc6066) which provides specifications for TLS extensions.
 
 ## Security/Tests
-One piece of evidence for the security of the program can be seen in this [zipped sample capture from Wireshark](https://www.dropbox.com/s/5xo37gr07b14q4e/Sample_Capture.pcapng.zip?dl=0). In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to add ports to a protocol's filter so that the actual SSL/TLS packets can be seen.
+One piece of evidence for the security of the program can be seen in this [zipped sample capture from Wireshark](https://www.dropbox.com/s/5xo37gr07b14q4e/Sample_Capture.pcapng.zip?dl=0). In order to replicate the test one can choose the `loopback` interface in Wireshark and begin capturing packets while specifying the filter `(tcp.port == 6666) or (tcp.port == 8888)` where the ports are the source and destination port specified to the clients. Additionally [this](https://osqa-ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl) link shows how to add ports to a protocol's filter so that the actual SSL/TLS packets can be seen. 
 
 ## References
 https://docs.python.org/3/installing/index.html
